@@ -1,0 +1,72 @@
+DATA_DIR: ../Charades-STA
+
+DATASET:
+  NAME: Charades
+  VIS_INPUT_TYPE: vgg_rgb
+  NO_VAL: True
+  NUM_SAMPLE_CLIPS: 256
+  TARGET_STRIDE: 4
+  NORMALIZE: True
+
+MODEL:
+  NAME: TAN
+  CHECKPOINT: ./checkpoints/Charades/TAN_vgg_rgb/iter004825.pkl
+
+TAN:
+
+  FRAME_MODULE:
+    NAME: FrameAvgPool
+    PARAMS:
+      KERNEL_SIZE: 4
+      STRIDE: 4
+
+  VLBERT_MODULE:
+    NAME: TLocVLBERT
+    PARAMS:
+      vis_enc_layers: 1
+      txt_enc_layers: 1
+
+      visual_size: 4096
+      hidden_size: 512
+      num_hidden_layers: 6
+      num_attention_heads: 2
+      intermediate_size: 512
+      hidden_act: "gelu"
+      hidden_dropout_prob: 0.1
+      attention_probs_dropout_prob: 0.1
+      vocab_size: 1336
+      initializer_range: 0.02
+      visual_scale_object_init: 1.0
+      visual_ln: False
+
+      vldcnp_scale: 1.0
+
+      graph_layer_num: 2
+      graph_residual_scale: 1.0
+
+      CLASSIFIER_TYPE: "2fc"
+      CLASSIFIER_DROPOUT: 0.1
+      CLASSIFIER_HIDDEN_SIZE: 512
+
+LOSS:
+  NAME: bce_rescale_loss
+  PARAMS:
+    W1: 0.4
+    W2: 1.0
+    W3: 10.0
+    W4: 0.1
+    
+TRAIN:
+  BATCH_SIZE: 16
+  LR: 0.0001
+  WEIGHT_DECAY: 0.0000
+  MAX_EPOCH: 100
+  CONTINUE: False
+  
+TEST:
+  BATCH_SIZE: 16
+  RECALL: 1
+  TIOU: 0.3,0.5,0.7
+  EVAL_TRAIN: False
+  NMS_THRESH: 0.55
+  INTERVAL: 0.25
